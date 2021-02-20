@@ -146,7 +146,7 @@ Now some preformatted text:
 
   \\$ sudo python ...
 \\end{verbatim}'''
-    md = markdown.Markdown(None)
+    md = markdown.Markdown()
 
     def test_1(self):
         ltx = mdx_latex.makeExtension()

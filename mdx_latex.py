@@ -167,16 +167,15 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         latex_node.text = latex_text
         doc.append(latex_node)
 
-    def tolatex(self, ournode):
+    def tolatex(self, ournode: xml.etree.ElementTree.Element):
         buffer = ""
         subcontent = ""
 
         if ournode.text:
             subcontent += escape_latex_entities(ournode.text)
 
-        if ournode.getchildren():
-            for child in ournode.getchildren():
-                subcontent += self.tolatex(child)
+        for child in ournode:
+            subcontent += self.tolatex(child)
 
         if ournode.tag == 'h1':
             buffer += '\n\\title{%s}\n' % subcontent
