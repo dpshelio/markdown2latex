@@ -1,83 +1,17 @@
-#!/usr/bin/env python2
-"""Extension to python-markdown to support LaTeX (rather than html) output.
-
-Authored by Rufus Pollock: <http://www.rufuspollock.org/>
-Reworked by Julian Wulfheide (ju.wulfheide@gmail.com) and
-Pedro Gaudencio (pmgaudencio@gmail.com)
-
-Usage:
-======
-
-1. Command Line. A script entitled markdown2latex.py is automatically
-installed. For details of usage see help::
-
-    $ markdown2latex.py -h
-
-2. As a python-markdown extension::
-
-    >>> import markdown
-    >>> md = markdown.Markdown(None, extensions=['latex'])
-    >>> # text is input string ...
-    >>> latex_out = md.convert(text)
-
-3. Directly as a module (slight inversion of std markdown extension setup)::
-
-    >>> import markdown
-    >>> import mdx_latex
-    >>> md = markdown.Markdown()
-    >>> latex_mdx = mdx_latex.LaTeXExtension()
-    >>> latex_mdx.extendMarkdown(md, markdown.__dict__)
-    >>> out = md.convert(text)
-
-History
-=======
-
-Version: 1.0 (November 15, 2006)
-
-  * First working version (compatible with markdown 1.5)
-  * Includes support for tables
-
-Version: 1.1 (January 17, 2007)
-
-  * Support for verbatim and images
-
-Version: 1.2 (June 2008)
-
-  * Refactor as an extension.
-  * Make into a proper python/setuptools package.
-  * Tested with markdown 1.7 but should work with 1.6 and (possibly) 1.5
-    (though pre/post processor stuff not as worked out there)
-
-Version 1.3: (July 2008)
-  * Improvements to image output (width)
-
-Version 1.3.1: (August 2009)
-  * Tiny bugfix to remove duplicate keyword argument and set zip_safe=False
-  * Add [width=\textwidth] by default for included images
-
-Version 2.0: (June 2011)
-  * PEP8 cleanup
-  * Major rework since this was broken by new Python-Markdown releases
-
-Version 2.1: (August 2013)
-  * Add handler for non locally referenced images, hyperlinks and horizontal rules
-  * Update math delimiters
-"""
-
-__version__ = '2.1'
-
 # do some fancy importing stuff to allow use to override things in this module
 # in this file while still importing * for use in our own classes
-import re
-import sys
-import markdown
-import xml.dom.minidom
-from urllib.parse import urlparse
 import http.client
 import os
+import re
+import sys
 import tempfile
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
+import urllib.parse
+import urllib.request
+import xml.dom.minidom
+from urllib.parse import urlparse
 
+import markdown
 
 start_single_quote_re = re.compile("(^|\s|\")'")
 start_double_quote_re = re.compile("(^|\s|'|`)\"")
@@ -117,10 +51,6 @@ def unescape_latex_entities(text):
     return out
 
 
-def makeExtension(configs=None):
-    return LaTeXExtension(configs=configs)
-
-
 class LaTeXExtension(markdown.Extension):
     def __init__(self, configs=None):
         self.reset()
@@ -135,8 +65,8 @@ class LaTeXExtension(markdown.Extension):
         #         self.md.inlinePatterns.pop(key)
         #         break
 
-        #footnote_extension = FootnoteExtension()
-        #footnote_extension.extendMarkdown(md, md_globals)
+        # footnote_extension = FootnoteExtension()
+        # footnote_extension.extendMarkdown(md, md_globals)
 
         latex_tp = LaTeXTreeProcessor()
         math_pp = MathTextPostProcessor()
@@ -216,8 +146,8 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         # ignore 'code' when inside pre tags
         # (mkdn produces <pre><code></code></pre>)
         elif (ournode.tag == 'pre' or
-                             # TODO: Take a look here
-             (ournode.tag == 'pre' and ournode.parentNode.tag != 'pre')):
+              # TODO: Take a look here
+              (ournode.tag == 'pre' and ournode.parentNode.tag != 'pre')):
             buffer += """
 \\begin{verbatim}
 %s
@@ -249,10 +179,10 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             buffer += '<td>%s</td>' % subcontent
         elif ournode.tag == 'img':
             buffer += '<img src=\"%s\" alt=\"%s\" />' % (ournode.get('src'),
-                      ournode.get('alt'))
+                                                         ournode.get('alt'))
         elif ournode.tag == 'a':
             buffer += '<a href=\"%s\">%s</a>' % (ournode.get('href'),
-                      subcontent)
+                                                 subcontent)
         else:
             buffer = subcontent
 
@@ -267,6 +197,7 @@ class UnescapeHtmlTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         return unescape_html_entities(text)
 
+
 # ========================= MATHS =================================
 
 
@@ -280,6 +211,7 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
         mathematics delimiter (*not* the standard asciimathml or latexmathml
         delimiter).
         """
+
         def repl_1(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
             return '\\[%s\\]' % text
@@ -477,7 +409,7 @@ class Img2Latex(object):
                 src = filename
 
         alt = img.getAttribute('alt')
-	# Using graphicx and ajustbox package for *max width*
+        # Using graphicx and ajustbox package for *max width*
         out = \
             """
             \\begin{figure}[H]
@@ -535,7 +467,7 @@ definition in footnote market <sup> as opposed to putting a reference link).
 """
 
 
-class FootnoteExtension (markdown.Extension):
+class FootnoteExtension(markdown.Extension):
     DEF_RE = re.compile(r"(\ ?\ ?\ ?)\[\^([^\]]*)\]:\s*(.*)")
     SHORT_USE_RE = re.compile(r"\[\^([^\]]*)\]", re.M)  # [^a]
 
@@ -549,16 +481,16 @@ class FootnoteExtension (markdown.Extension):
         md.registerExtension(self)
 
         # Insert a preprocessor before ReferencePreprocessor
-        #index = md.preprocessors.index(md_globals['REFERENCE_PREPROCESSOR'])
-        #preprocessor = FootnotePreprocessor(self)
-        #preprocessor.md = md
-        #md.preprocessors.insert(index, preprocessor)
+        # index = md.preprocessors.index(md_globals['REFERENCE_PREPROCESSOR'])
+        # preprocessor = FootnotePreprocessor(self)
+        # preprocessor.md = md
+        # md.preprocessors.insert(index, preprocessor)
         md.preprocessors.add('footnotes', FootnotePreprocessor(self), '_begin')
 
         ## Insert an inline pattern before ImageReferencePattern
         FOOTNOTE_RE = r"\[\^([^\]]*)\]"  # blah blah [^1] blah
-        #index = md.inlinePatterns.index(md_globals['IMAGE_REFERENCE_PATTERN'])
-        #md.inlinePatterns.insert(index, FootnotePattern(FOOTNOTE_RE, self))
+        # index = md.inlinePatterns.index(md_globals['IMAGE_REFERENCE_PATTERN'])
+        # md.inlinePatterns.insert(index, FootnotePattern(FOOTNOTE_RE, self))
         md.inlinePatterns.add('footnotes', FootnotePattern(FOOTNOTE_RE, self),
                               '_begin')
 
@@ -692,6 +624,7 @@ def main():
         out = template(tmpl_fo, out)
 
     print(out)
+
 
 if __name__ == '__main__':
     main()
