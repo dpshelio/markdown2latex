@@ -33,7 +33,7 @@ def escape_latex_entities(text):
     out = out.replace('%', '\\%')
     out = out.replace('&', '\\&')
     out = out.replace('#', '\\#')
-    out = start_single_quote_re.sub('\g<1>`', out)
+    out = start_single_quote_re.sub('\g<1>\'', out)
     out = start_double_quote_re.sub('\g<1>``', out)
     out = end_double_quote_re.sub("''\g<1>", out)
     # people should escape these themselves as it conflicts with maths
