@@ -1,14 +1,15 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from mdx_latex import __version__, __doc__
 
 setup(
     name='markdown2latex',
     version=__version__,
-    entry_points='''
-    [console_scripts]
-    markdown2latex.py=mdx_latex.latex:main
-    ''',
+    packages=find_packages(exclude=['*.test']),
+    entry_points={
+	'console_scripts': [
+    "markdown2latex.py = mdx_latex.latex:main"
+    ]},
     install_requires=[
         'Markdown>=1.5',
     ],
